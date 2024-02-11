@@ -33,7 +33,7 @@ interface ChatCompletionRequest {
 }
 
 function isChatCompletionModel(model: string): boolean {
-  // Also works with snapshot model like `gpt-3.5-turbo-0301` & `gpt-4-0314`
+  // Também funciona com modelos de snapshot como `gpt-3.5-turbo-0301` e `gpt-4-0314`
   return model.includes('gpt-3.5-turbo') || model.includes('gpt-4');
 }
 
@@ -49,7 +49,7 @@ async function getChatCompletion(context: coda.ExecutionContext, request: ChatCo
 
 async function getCompletion(context: coda.ExecutionContext, request: CompletionsRequest): Promise<string> {
   try {
-    // Call Chat Completion API if the model is a chat completion model.
+    // Chama a API de conclusão de chat se o modelo for um modelo de conclusão de chat.
     if (isChatCompletionModel(request.model)) {
       return getChatCompletion(context, {
         model: request.model,
@@ -69,7 +69,7 @@ async function getCompletion(context: coda.ExecutionContext, request: Completion
   } catch (err: any) {
     if (err.statusCode === 429 && err.type === 'insufficient_quota') {
       throw new coda.UserVisibleError(
-        "You've exceed your current OpenAI API quota. Please check your plan and billing details. For help, see https://help.openai.com/en/articles/6891831-error-code-429-you-exceeded-your-current-quota-please-check-your-plan-and-billing-details",
+        "Você excedeu sua cota atual da API OpenAI. Verifique seu plano e detalhes de faturamento. Para obter ajuda, consulte https://help.openai.com/en/articles/6891831-error-code-429-you-exceeded-your-current-quota-please-check-your-plan-and-billing-details",
       );
     }
 
@@ -87,7 +87,7 @@ const modelParameter = coda.makeParameter({
   type: coda.ParameterType.String,
   name: 'model',
   description:
-    "the GPT-3 model to process your request. If you don't specify a model, it defaults to text-ada-001, which is the fastest and lowest cost. For higher quality generation, consider text-davinci-003. For more information, see https://platform.openai.com/docs/models/overview.",
+    "o modelo GPT-3 para processar sua solicitação. Se você não especificar um modelo, o padrão será text-ada-001, que é o mais rápido e de menor custo. Para geração de maior qualidade, considere text-davinci-003. Para mais informações, veja https://platform.openai.com/docs/models/overview.",
   optional: true,
   autocomplete: async () => {
     return [
@@ -108,7 +108,7 @@ const numTokensParam = coda.makeParameter({
   type: coda.ParameterType.Number,
   name: 'numTokens',
   description:
-    'the maximum number of tokens for the completion to output. Defaults to 512. Maximum of 2048 for most models and 4000 for davinci',
+    'o número máximo de tokens para a conclusão ser gerada. O padrão é 512. Máximo de 2.048 para a maioria dos modelos e 4.000 para davinci',
   optional: true,
 });
 
@@ -116,21 +116,21 @@ const temperatureParam = coda.makeParameter({
   type: coda.ParameterType.Number,
   name: 'temperature',
   description:
-    'the temperature for how creative GPT-3 is with the completion. Must be between 0.0 and 1.0. Defaults to 1.0.',
+    'a temperatura de quão criativo o GPT-3 é com a conclusão. Deve estar entre 0,0 e 1,0. O padrão é 1.0..',
   optional: true,
 });
 
 const systemPromptParam = coda.makeParameter({
   type: coda.ParameterType.String,
   name: 'systemPrompt',
-  description: "Optional. Helps define the behavior of the assistant. e.g. 'You are a helpful assistant.'",
+  description: "Opcional. Ajuda a definir o comportamento do assistente. por exemplo. 'Você é um assistente prestativo.'",
   optional: true,
 });
 
 const stopParam = coda.makeParameter({
   type: coda.ParameterType.StringArray,
   name: 'stop',
-  description: 'Optional. Up to 4 sequences where the API will stop generating further tokens.',
+  description: 'Opcional. Até 4 sequências em que a API irá parar de gerar mais tokens.',
   optional: true,
 });
 
@@ -159,7 +159,7 @@ const commonPromptParams = {
 pack.addFormula({
   name: 'ChatCompletion',
   description:
-    'Takes prompt as input, and return a model-generated message as output. Optionally, you can provide a system message to control the behavior of the chatbot.',
+    'Recebe prompt como entrada e retorna uma mensagem gerada pelo modelo como saída. Opcionalmente, você pode fornecer uma mensagem do sistema para controlar o comportamento do chatbot.',
   parameters: [promptParam, systemPromptParam, modelParameter, numTokensParam, temperatureParam, stopParam],
   resultType: coda.ValueType.String,
   onError: handleError,
@@ -167,7 +167,7 @@ pack.addFormula({
     [userPrompt, systemPrompt, model = 'gpt-3.5-turbo', maxTokens = 512, temperature, stop],
     context,
   ) {
-    coda.assertCondition(isChatCompletionModel(model), 'Must use `gpt-3.5-turbo`-related models for this formula.');
+    coda.assertCondition(isChatCompletionModel(model), 'Deve usar modelos relacionados ao `gpt-3.5-turbo` para esta fórmula.');
 
     if (userPrompt.length === 0) {
       return '';
@@ -197,28 +197,28 @@ pack.addFormula({
 
 pack.addFormula({
   name: 'GPT3Prompt',
-  description: 'Complete text from a prompt',
+  description: 'Texto completo de um prompt',
   ...commonPromptParams,
   isExperimental: true,
 } as any);
 
 pack.addFormula({
   name: 'Prompt',
-  description: 'Complete text from a prompt',
+  description: 'Texto completo de um prompt',
   ...commonPromptParams,
 } as any);
 
 pack.addFormula({
   name: 'AnswerPrompt',
   description:
-    'Complete text from a prompt, outputs the result from the action. This should only be used in a table in combination with outputting the result to a result column; otherwise, it takes no effect.',
+    'Texto completo de um prompt, gera o resultado da ação. Isto só deve ser usado em uma tabela em combinação com a saída do resultado para uma coluna de resultados; caso contrário, não terá efeito.',
   ...commonPromptParams,
   isAction: true,
 } as any);
 
 pack.addFormula({
   name: 'GPT3PromptExamples',
-  description: 'Complete text from a prompt and a set of examples',
+  description: 'Texto completo a partir de um prompt e um conjunto de exemplos',
   parameters: [
     coda.makeParameter({
       type: coda.ParameterType.String,
@@ -228,12 +228,12 @@ pack.addFormula({
     coda.makeParameter({
       type: coda.ParameterType.StringArray,
       name: 'trainingPrompts',
-      description: 'Example prompts. Should be the same length as `trainingResponses`',
+      description: 'Solicitações de exemplo. Deve ter o mesmo comprimento que `trainingResponses`',
     }),
     coda.makeParameter({
       type: coda.ParameterType.StringArray,
       name: 'trainingResponses',
-      description: 'Example responses corresponding to `trainingPrompts`. Should be the same length.',
+      description: 'Exemplos de respostas correspondentes a `trainingPrompts`. Deve ter o mesmo comprimento',
     }),
     modelParameter,
     numTokensParam,
@@ -248,12 +248,12 @@ pack.addFormula({
   ) {
     coda.assertCondition(
       trainingPrompts.length === trainingResponses.length,
-      'Must have same number of example prompts as example responses',
+      'Deve ter o mesmo número de prompts de exemplo que de respostas de exemplo',
     );
     if (prompt.length === 0) {
       return '';
     }
-    coda.assertCondition(trainingResponses.length > 0, 'Please provide some training responses');
+    coda.assertCondition(trainingResponses.length > 0, 'Forneça algumas respostas de treinamento');
 
     const exampleData = trainingPrompts.map((promptEx, i) => `${promptEx}\n${trainingResponses[i]}`).join('```');
 
@@ -273,7 +273,7 @@ pack.addFormula({
 
 pack.addFormula({
   name: 'QuestionAnswer',
-  description: 'Answer a question, simply provide a natural language question that you might ask Google or Wikipedia',
+  description: 'Responda a uma pergunta, simplesmente forneça uma pergunta em linguagem natural que você possa fazer ao Google ou à Wikipedia',
   parameters: [promptParam, modelParameter, numTokensParam, temperatureParam, stopParam],
   resultType: coda.ValueType.String,
   onError: handleError,
@@ -282,31 +282,30 @@ pack.addFormula({
       return '';
     }
 
-    const newPrompt = `I am a highly intelligent question answering bot. If you ask me a question that is rooted in truth, I will give you the answer. If you ask me a question that is nonsense, trickery, or has no clear answer, I will respond with "Unknown".
+    const newPrompt = `Sou um bot de resposta a perguntas altamente inteligente. Se você me fizer uma pergunta que esteja enraizada na verdade, eu lhe darei a resposta. Se você me fizer uma pergunta que seja absurda, enganosa ou que não tenha uma resposta clara, responderei com "Desconhecido".
 
-Q: What is human life expectancy in the United States?
-A: Human life expectancy in the United States is 78 years.
-
-Q: Who was president of the United States in 1955?
-A: Dwight D. Eisenhower was president of the United States in 1955.
-
-Q: Which party did he belong to?
-A: He belonged to the Republican Party.
-
-Q: What is the square root of banana?
-A: Unknown
-
-Q: How does a telescope work?
-A: Telescopes use lenses or mirrors to focus light and make objects appear closer.
-
-Q: Where were the 1992 Olympics held?
-A: The 1992 Olympics were held in Barcelona, Spain.
-
-Q: How many squigs are in a bonk?
-A: Unknown
-
-Q: ${prompt}
-A: `;
+    P: Qual é a expectativa de vida humana nos Estados Unidos?
+    R: A expectativa de vida humana nos Estados Unidos é de 78 anos.
+    
+    P: Quem era o presidente dos Estados Unidos em 1955?
+    R: Dwight D. Eisenhower foi presidente dos Estados Unidos em 1955.
+    
+    P: A qual partido ele pertencia?
+    R: Ele pertencia ao Partido Republicano.
+    
+    P: Qual é a raiz quadrada da banana?
+    R: Desconhecido
+    
+    P: Como funciona um telescópio?
+    R: Os telescópios usam lentes ou espelhos para focar a luz e fazer os objetos parecerem mais próximos.
+    
+    P: Onde foram realizadas as Olimpíadas de 1992?
+    R: As Olimpíadas de 1992 foram realizadas em Barcelona, ​​Espanha.
+    
+    P: Quantos squigs estão em uma situação difícil?
+    R: Desconhecido
+P: ${prompt}
+R: `;
 
     const request = {
       model,
@@ -324,7 +323,7 @@ A: `;
 
 pack.addFormula({
   name: 'Summarize',
-  description: 'Summarize a large chunk of text',
+  description: 'Resuma um grande pedaço de texto',
   parameters: [promptParam, modelParameter, numTokensParam, temperatureParam, stopParam],
   resultType: coda.ValueType.String,
   onError: handleError,
@@ -351,7 +350,7 @@ pack.addFormula({
 
 pack.addFormula({
   name: 'Keywords',
-  description: 'Extract keywords from a large chunk of text',
+  description: 'Extraia palavras-chave de um grande pedaço de texto',
   parameters: [promptParam, modelParameter, numTokensParam, temperatureParam, stopParam],
   resultType: coda.ValueType.String,
   onError: handleError,
@@ -379,7 +378,7 @@ ${prompt}`;
 
 pack.addFormula({
   name: 'MoodToColor',
-  description: 'Generate a color for a mood',
+  description: 'Gere uma cor para um clima',
   parameters: [promptParam, modelParameter, numTokensParam, temperatureParam, stopParam],
   resultType: coda.ValueType.String,
   onError: handleError,
@@ -407,7 +406,7 @@ background-color: #`;
 
 pack.addFormula({
   name: 'SentimentClassifier',
-  description: 'Categorizes sentiment of text into positive, neutral, or negative',
+  description: 'Categoriza o sentimento do texto em positivo, neutro ou negativo',
   parameters: [promptParam, modelParameter, numTokensParam, temperatureParam, stopParam],
   resultType: coda.ValueType.String,
   onError: handleError,
@@ -416,7 +415,7 @@ pack.addFormula({
       return '';
     }
 
-    const newPrompt = `Decide whether the text's sentiment is positive, neutral, or negative.
+    const newPrompt = `Decida se o sentimento do texto é positivo, neutro ou negativo.
 Text: ${prompt}
 Sentiment: `;
 
@@ -438,7 +437,7 @@ const styleParameter = coda.makeParameter({
   type: coda.ParameterType.String,
   name: 'style',
   description:
-    "the style to use for your image. If you provide this, you don't need to specify the style in the prompt",
+    "o estilo a ser usado em sua imagem. Se você fornecer isso, não precisará especificar o estilo no prompt",
   optional: true,
   autocomplete: async () => {
     return Object.keys(StyleNameToPrompt);
@@ -486,7 +485,7 @@ pack.addFormula({
     coda.makeParameter({
       type: coda.ParameterType.Boolean,
       name: 'temporaryUrl',
-      description: 'Return a temporary URL that expires after an hour. Useful for adding the image to an Image column, because the default data URIs are too long.',
+      description: 'Retorne um URL temporário que expira após uma hora. Útil para adicionar a imagem a uma coluna Imagem, porque os URIs de dados padrão são muito longos.',
       optional: true,
     }),
   ],
@@ -520,18 +519,18 @@ pack.addFormula({
 
 function handleError(error: Error) {
   if (coda.StatusCodeError.isStatusCodeError(error)) {
-    // Cast the error as a StatusCodeError, for better intellisense.
+   // Converte o erro como StatusCodeError, para melhor intellisense.
     let statusError = error as coda.StatusCodeError;
     let message = statusError.body?.error?.message;
 
-    // If the API returned a 400 error with message, show it to the user.
+    // Se a API retornou um erro 400 com mensagem, mostre ao usuário.
     if (statusError.statusCode === 400 && message) {
       if (message) {
         throw new coda.UserVisibleError(message);
       }
     }
   }
-  // The request failed for some other reason. Re-throw the error so that it
-  // bubbles up.
+// A solicitação falhou por algum outro motivo. Relançar o erro para que ele
+  // borbulha.
   throw error;
 }
